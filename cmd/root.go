@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/gookit/color"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"os"
@@ -23,8 +24,7 @@ var (
 
 func Execute() {
 	if err := rootCmd.Execute(); err != nil {
-		fmt.Println(err)
-		os.Exit(exitError)
+		terminateCmd(err, "failed to execute command")
 	}
 }
 
@@ -47,4 +47,21 @@ func initCfg() {
 	if err := viper.ReadInConfig(); err == nil {
 		fmt.Println("Using config file:", viper.ConfigFileUsed())
 	}
+}
+
+func terminateCmd(err error, msg string) {
+	var msgFmt string
+	var vars []interface{}
+	if err != nil && msg != "" {
+		msgFmt = "%s: %v \n"
+		vars = append(vars, msg, err)
+	} else if err != nil {
+		msgFmt = "terminated with error: %v \n"
+		vars = append(vars, err)
+	} else {
+		msgFmt = "internal error: %s \n"
+		vars = append(vars, msg)
+	}
+	color.BgRed.Printf(msgFmt, vars)
+	os.Exit(exitError)
 }

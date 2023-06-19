@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"fmt"
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/gookit/color"
 	"github.com/jlwt90/reportify/tracker"
@@ -24,16 +23,11 @@ func init() {
 func runInit(cmd *cobra.Command, args []string) {
 	// Load config
 	if err := viper.ReadInConfig(); err != nil {
-		viper.Set("ConfigFilePath", cfgPath)
-
 		if err = os.MkdirAll(cfgPath, os.ModePerm); err != nil {
-			fmt.Println(err)
-			os.Exit(exitError)
+			terminateCmd(err, "")
 		}
-
 		if err = viper.WriteConfigAs(cfgPath + "/config.yaml"); err != nil {
-			fmt.Println(err)
-			os.Exit(exitError)
+			terminateCmd(err, "")
 		}
 	}
 
@@ -44,25 +38,21 @@ func runInit(cmd *cobra.Command, args []string) {
 		Options: tracker.SupportedTrackers,
 	}
 	if err := survey.AskOne(prompt, &sys); err != nil {
-		fmt.Println(err)
-		os.Exit(exitError)
+		terminateCmd(err, "")
 	}
 	color.Bold.Printf("Generating project profile for %s. \n", sys)
 
 	// Set up tracker if necessary
 	t, ok := tracker.NewTracker(sys)
 	if !ok {
-		fmt.Println("Tracker type is unsupported")
-		os.Exit(exitError)
+		terminateCmd(nil, "Tracker type is unsupported")
 	}
 	if err := t.SetUpTracker(); err != nil {
-		fmt.Println(err)
-		os.Exit(exitError)
+		terminateCmd(err, "")
 	}
 
 	// persist configuration to config directory
 	if err := viper.WriteConfig(); err != nil {
-		fmt.Println(err)
-		os.Exit(exitError)
+		terminateCmd(err, "")
 	}
 }
