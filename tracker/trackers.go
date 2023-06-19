@@ -6,12 +6,8 @@ const Jira = "Jira"
 
 var SupportedTrackers = []string{Jira}
 
-type ProfileManager interface {
-}
-
 type Tracker interface {
 	SetUpTracker() error
-	ProfileManager
 }
 
 // NewTracker creates a tracker instance with the type specified.
